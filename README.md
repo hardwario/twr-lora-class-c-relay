@@ -21,32 +21,14 @@ The temperature is measured every 30 seconds and the value sent is the average t
 
 ## Payload
 
-### Uplink
-
-Big endian
-
-| Byte    | Name        | Type   | multiple | unit
-| ------: | ----------- | ------ | -------- | -------
-|       0 | HEADER      | uint8  |          |
-|       1 | ORIENTATION | uint8  |          |
-|  3 -  4 | TEMPERATURE | int16  | 10       | °C
-
-### Header enum
-
-* 0 - boot
-* 1 - update
-* 2 - button click
-* 3 - button hold
-* 4 - alarm
-
 ### Downlink
 
 Port: 1
 
 Relay enum:
 * 0x01 Power Module Relay
-* 0x02 Module Relay Default
-* 0x03 Modulerelay Alternate
+* 0x02 Module Relay Def
+* 0x03 Module Relay Alt
 
 State enum:
 * 0x00 OFF
@@ -55,8 +37,30 @@ State enum:
 Examples:
 
 * Power Module Relay ON: `0x0101`
+* Power Module Relay OFF: `0x0100`
 * Power Module Relay ON and Module Relay Default ON: `0x01010201`
 * Module Relay Default OFF: `0x0200`
+
+### Uplink
+
+Big endian
+
+| Byte    | Name        | Type   | multiple | unit
+| ------: | ----------- | ------ | -------- | -------
+|       0 | Header      | uint8  |          |
+|       1 | Orientation | uint8  |          |
+|       2 | State Power Module Relay | uint8   |  0: off, 1: on  |
+|       3 | State Module Relay Def | uint8 | 0: off, 1: on, 0xff: unknown |
+|       4 | State Module Relay Alt | uint8 |  0: off, 1: on, 0xff: unknown |
+|  5 -  6 | Temperature | int16  | 10       | °C
+
+### Header enum
+
+* 0 - boot
+* 1 - update
+* 2 - button click
+* 3 - button hold
+* 4 - alarm
 
 ## AT interface
 

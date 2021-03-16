@@ -54,6 +54,13 @@ Big endian
 |       4 | State Module Relay Alt | uint8 |  0: off, 1: on, 0xff: unknown |
 |  5 -  6 | Temperature | int16  | 10       | °C
 
+#### Example decoders:
+
+```
+python3 decode.py 040300ffff0100
+node decode.js 040300ffff0100
+```
+
 ### Header enum
 
 * 0 - boot

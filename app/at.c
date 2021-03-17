@@ -22,7 +22,7 @@ bool at_deveui_read(void)
 {
     twr_cmwx1zzabz_get_deveui(_at.lora, _at.tmp);
 
-    twr_atci_printf("$DEVEUI: %s", _at.tmp);
+    twr_atci_printfln("$DEVEUI: %s", _at.tmp);
 
     return true;
 }
@@ -43,7 +43,7 @@ bool at_devaddr_read(void)
 {
     twr_cmwx1zzabz_get_devaddr(_at.lora, _at.tmp);
 
-    twr_atci_printf("$DEVADDR: %s", _at.tmp);
+    twr_atci_printfln("$DEVADDR: %s", _at.tmp);
 
     return true;
 }
@@ -60,7 +60,7 @@ bool at_nwkskey_read(void)
 {
     twr_cmwx1zzabz_get_nwkskey(_at.lora, _at.tmp);
 
-    twr_atci_printf("$NWKSKEY: %s", _at.tmp);
+    twr_atci_printfln("$NWKSKEY: %s", _at.tmp);
 
     return true;
 }
@@ -81,7 +81,7 @@ bool at_appkey_read(void)
 {
     twr_cmwx1zzabz_get_appkey(_at.lora, _at.tmp);
 
-    twr_atci_printf("$APPKEY: %s", _at.tmp);
+    twr_atci_printfln("$APPKEY: %s", _at.tmp);
 
     return true;
 }
@@ -102,7 +102,7 @@ bool at_appeui_read(void)
 {
     twr_cmwx1zzabz_get_appeui(_at.lora, _at.tmp);
 
-    twr_atci_printf("$APPEUI: %s", _at.tmp);
+    twr_atci_printfln("$APPEUI: %s", _at.tmp);
 
     return true;
 }
@@ -123,7 +123,7 @@ bool at_appskey_read(void)
 {
     twr_cmwx1zzabz_get_appskey(_at.lora, _at.tmp);
 
-    twr_atci_printf("$APPSKEY: %s", _at.tmp);
+    twr_atci_printfln("$APPSKEY: %s", _at.tmp);
 
     return true;
 }
@@ -144,7 +144,7 @@ bool at_band_read(void)
 {
     twr_cmwx1zzabz_config_band_t band = twr_cmwx1zzabz_get_band(_at.lora);
 
-    twr_atci_printf("$BAND: %d", band);
+    twr_atci_printfln("$BAND: %d", band);
 
     return true;
 }
@@ -167,7 +167,7 @@ bool at_mode_read(void)
 {
     twr_cmwx1zzabz_config_mode_t mode = twr_cmwx1zzabz_get_mode(_at.lora);
 
-    twr_atci_printf("$MODE: %d", mode);
+    twr_atci_printfln("$MODE: %d", mode);
 
     return true;
 }
@@ -197,7 +197,7 @@ bool at_nwk_read(void)
 {
     uint8_t nwk_public = twr_cmwx1zzabz_get_nwk_public(_at.lora);
 
-    twr_atci_printf("$NWK: %d", nwk_public);
+    twr_atci_printfln("$NWK: %d", nwk_public);
 
     return true;
 }
@@ -249,7 +249,7 @@ bool at_led_set(twr_atci_param_t *param)
 
 bool at_led_help(void)
 {
-    twr_atci_printf("$LED: (0,1)");
+    twr_atci_printfln("$LED: (0,1)");
 
     return true;
 }

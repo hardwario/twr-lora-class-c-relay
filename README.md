@@ -30,9 +30,16 @@ Relay enum:
 * 0x02 Module Relay Def
 * 0x03 Module Relay Alt
 
-State enum:
-* 0x00 OFF
-* 0x01 ON
+Change relay enum:
+* 0x00 Off
+* 0x01 On
+* 0x02 Toggle
+* 0x03 Pulse 500 ms
+* 0x04 Pulse 1000 ms
+* 0x05 Pulse 1.5s
+* 0x06 Pulse 2.0s
+* ...
+* 0xf2 Pulse 120.0s
 
 Examples:
 
@@ -45,14 +52,14 @@ Examples:
 
 Big endian
 
-| Byte    | Name        | Type   | multiple | unit
+| Byte    | Name        | Type   |  Value / State | note
 | ------: | ----------- | ------ | -------- | -------
 |       0 | Header      | uint8  |          |
 |       1 | Orientation | uint8  |          |
-|       2 | State Power Module Relay | uint8   |  0: off, 1: on  |
-|       3 | State Module Relay Def | uint8 | 0: off, 1: on, 0xff: unknown |
-|       4 | State Module Relay Alt | uint8 |  0: off, 1: on, 0xff: unknown |
-|  5 -  6 | Temperature | int16  | 10       | °C
+|       2 | Relay | uint8   |  0: Off, 1: On  | Power Module Relay
+|       3 | Relay_0 | uint8 | 0: Off, 1: On, 0xff: Unknown | Module Relay default i2c address
+|       4 | Relay_1 | uint8 |  0: Off, 1: On, 0xff: Unknown | Module Relay alternate i2c address
+|  5 -  6 | Temperature | int16  | multiple 10, unit °C |
 
 #### Example decoders:
 
@@ -64,10 +71,11 @@ node decode.js 040300ffff0100
 ### Header enum
 
 * 0 - boot
-* 1 - update
-* 2 - button click
-* 3 - button hold
-* 4 - alarm
+* 1 - beacon
+* 2 - update
+* 3 - button click
+* 4 - button hold
+* 5 - alarm
 
 ## AT interface
 

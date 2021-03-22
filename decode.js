@@ -1,11 +1,13 @@
 function Decoder(bytes, port) {
     var lut = {
         0: 'BOOT',
-        1: 'UPDATE',
-        2: 'BUTTON_CLICK',
-        3: 'BUTTON_HOLD',
-        4: 'ALARM'
-    }
+        1: 'BEACON',
+        2: 'UPDATE',
+        3: 'BUTTON_CLICK',
+        4: 'BUTTON_HOLD',
+        5: 'ALARM'
+    };
+
     var temperature = ((bytes[5] << 8) | bytes[6]);
 
     if (temperature != 65535) {
@@ -18,9 +20,9 @@ function Decoder(bytes, port) {
     return {
         header: lut[bytes[0]],
         orientation: bytes[1],
-        relay_state: bytes[2],
-        relay_def_state: bytes[3] != 255 ? bytes[3] : null,
-        relay_alt_state: bytes[4] != 255 ? bytes[3] : null,
+        relay: bytes[2],
+        relay_0: bytes[3] != 255 ? bytes[3] : null,
+        relay_1: bytes[4] != 255 ? bytes[3] : null,
         "temperature": temperature,
     };
   }

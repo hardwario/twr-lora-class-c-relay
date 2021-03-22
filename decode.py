@@ -2,19 +2,15 @@
 import sys
 import __future__
 
-HEADER_BOOT =  0x00
-HEADER_UPDATE = 0x01
-HEADER_BUTTON_CLICK = 0x02
-HEADER_BUTTON_HOLD  = 0x03
-HEADER_ALARM = 0x04
-
 header_lut = {
-    HEADER_BOOT: 'BOOT',
-    HEADER_UPDATE: 'UPDATE',
-    HEADER_BUTTON_CLICK: 'BUTTON_CLICK',
-    HEADER_BUTTON_HOLD: 'BUTTON_HOLD',
-    HEADER_ALARM: 'ALARM'
+    0: 'BOOT',
+    1: 'BEACON',
+    2: 'UPDATE',
+    3: 'BUTTON_CLICK',
+    4: 'BUTTON_HOLD',
+    5: 'ALARM'
 }
+
 
 
 def decode(data):
@@ -33,9 +29,9 @@ def decode(data):
     return {
         "header": header_lut[header],
         "orientation": int(data[2:4], 16),
-        "state Power Module Relay": int(data[4:6], 16),
-        "state Module Relay Def": int(data[6:8], 16) if data[6:8] != 'ff' else None,
-        "state Module Relay Alt": int(data[8:10], 16) if data[8:10] != 'ff' else None,
+        "relay": int(data[4:6], 16),
+        "relay_0": int(data[6:8], 16) if data[6:8] != 'ff' else None,
+        "relay_1": int(data[8:10], 16) if data[8:10] != 'ff' else None,
         "temperature": temperature,
     }
 
@@ -43,9 +39,9 @@ def decode(data):
 def pprint(data):
     print('Header :', data['header'])
     print('Orientation :', data['orientation'])
-    print('State Power Module Relay :', data['state Power Module Relay'])
-    print('State Module Relay Def :', data['state Module Relay Def'])
-    print('State Module Relay Alt :', data['state Module Relay Alt'])
+    print('Relay :', data['relay'])
+    print('Relay 0 :', data['relay_0'])
+    print('Relay 1 :', data['relay_1'])
     print('Temperature :', data['temperature'])
 
 

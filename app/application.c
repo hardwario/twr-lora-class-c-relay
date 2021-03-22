@@ -260,13 +260,16 @@ void lora_callback(twr_cmwx1zzabz_t *self, twr_cmwx1zzabz_event_t event, void *e
 
         uint8_t port = twr_cmwx1zzabz_get_received_message_port(self);
         uint32_t length = twr_cmwx1zzabz_get_received_message_data(self, rx_buffer, sizeof(rx_buffer));
-        twr_atci_printfln("@RECEIVED: %d,%d", port, length);
-        // twr_log_dump(rx_buffer, length, "rx_buffer:");
 
         if (port != 1)
         {
-            twr_log_error("Bad port");
+            twr_log_error("Bad port: %d", port);
+            return;
         }
+
+        twr_atci_print("@RECEIVED: \"");
+        twr_atci_print_buffer_as_hex(rx_buffer, length);
+        twr_atci_print("\"\r\n");
 
         execute_rx(length);
     }

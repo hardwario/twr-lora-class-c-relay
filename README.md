@@ -1,6 +1,6 @@
 <a href="https://www.hardwario.com/"><img src="https://www.hardwario.com/ci/assets/hw-logo.svg" width="200" alt="HARDWARIO Logo" align="right"></a>
 
-# Firmware for HARDWARIO Lora CLASS C Relay
+# Firmware for HARDWARIO Lora CLASS-C Relay
 
 [![Travis](https://img.shields.io/travis/hardwario/twr-lora-class-c-relay/master.svg)](https://travis-ci.org/hardwario/twr-lora-class-c-relay)
 [![Release](https://img.shields.io/github/release/hardwario/twr-lora-class-c-relay.svg)](https://github.com/hardwario/twr-lora-class-c-relay/releases)
@@ -9,7 +9,7 @@
 
 ## Description
 
-Relay control via LoRaWan, measure temperature and react on accelerometer event.
+Control Relay via LoRaWan, you can set On, Off, Toggle or Pulse for between 0.5s to 120s. Measure temperature and react on accelerometer event.
 
 Support [relay on Power Module](https://shop.hardwario.com/power-module) and [Relay Module](https://shop.hardwario.com/relay-module/).
 
@@ -41,12 +41,18 @@ Change relay enum:
 * ...
 * 0xf2 Pulse 120.0s
 
+
 Examples:
 
 * Power Module Relay ON: `0x0101`
 * Power Module Relay OFF: `0x0100`
+* Power Module Relay Pulse 3s: `0x0108`
 * Power Module Relay ON and Module Relay Default ON: `0x01010201`
 * Module Relay Default OFF: `0x0200`
+
+Compute pulse:
+
+hex(floor((delay / 500) + 2))
 
 ### Uplink
 

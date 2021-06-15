@@ -168,10 +168,12 @@ And join
 AT$JOIN
 ```
 
-### Hint how generate APPEUI and APPKEY
+### Generate DEVEUI + APPEUI + APPKEY
+
 ```
-echo -n 'AT$APPEUI=' && hexdump -n 8 -e '4/4 "%08X" 1 "\n"' /dev/random
-echo -n 'AT$APPKEY=' &&hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/random
+echo -n 'AT$DEVEUI=' && hexdump -n  8 -e '4/4 "%08X" 1 "\n"' /dev/random
+echo -n 'AT$APPEUI=' && hexdump -n  8 -e '4/4 "%08X" 1 "\n"' /dev/random
+echo -n 'AT$APPKEY=' && hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/random
 ```
 
 ## License

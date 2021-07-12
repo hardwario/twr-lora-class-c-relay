@@ -29,6 +29,8 @@ Relay enum:
 * 0x01 Power Module Relay
 * 0x02 Module Relay Def
 * 0x03 Module Relay Alt
+* 0x04 CHESTER A Relay 1
+* 0x05 CHESTER A Relay 2
 
 Change relay enum:
 * 0x00 Off
@@ -66,7 +68,8 @@ Big endian
 |       3 | Relay_0 | uint8 | 0: Off, 1: On, 0xff: Unknown | Module Relay default i2c address
 |       4 | Relay_1 | uint8 |  0: Off, 1: On, 0xff: Unknown | Module Relay alternate i2c address
 |  5 -  6 | Temperature | int16  | multiple 10, unit °C |
-
+|       7 | CHESTER A Relay 1 | uint8   |  0: Off, 1: On  | Power Module Relay
+|       8 | CHESTER A Relay 2 | uint8   |  0: Off, 1: On  | Power Module Relay
 #### Example decoders:
 
 ```

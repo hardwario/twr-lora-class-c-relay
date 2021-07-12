@@ -17,7 +17,7 @@ function Decoder(bytes, port) {
         temperature = null;
     }
 
-    return {
+    var payload = {
         header: lut[bytes[0]],
         orientation: bytes[1],
         relay: bytes[2],
@@ -25,7 +25,16 @@ function Decoder(bytes, port) {
         relay_1: bytes[4] != 255 ? bytes[3] : null,
         "temperature": temperature,
     };
+
+    if (bytes.length == 9) {
+        payload.chester_a_relay_1 = bytes[7] != 255 ? bytes[7] : null;
+        payload.chester_a_relay_2 = bytes[8] != 255 ? bytes[8] : null;
+    }
+
+    return payload;
   }
+
+// CLI
 
   const buf = [...Buffer.from(process.argv[2], 'hex')];
 

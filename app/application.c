@@ -8,8 +8,10 @@
 #define POWER_MODULE_RELAY 1
 #define MODULE_RELAY_DEFAULT 2
 #define MODULE_RELAY_ALTERNATE 3
+#define CHESTER_A_RELAY_1 4
+#define CHESTER_A_RELAY_2 5
 
-#define MESSAGE_SIZE 7
+#define MESSAGE_SIZE 9
 
 // LED instance
 twr_led_t led;
@@ -31,7 +33,9 @@ twr_module_relay_t relay_0;
 // Relay module alternate
 twr_module_relay_t relay_1;
 // Relay
-twr_scheduler_task_id_t relay_pulse_task_id;
+twr_scheduler_task_id_t pulse_task_id[6];
+// CHESTER A
+twr_chester_a_t chester_a;
 
 TWR_DATA_STREAM_FLOAT_BUFFER(ds_temperature_buffer, (SEND_UPDATE_INTERVAL / MEASURE_INTERVAL))
 twr_data_stream_t ds_temperature;
@@ -56,11 +60,13 @@ void send(uint8_t header)
     buffer[2] = twr_module_power_relay_get_state();
 
     twr_module_relay_state_t state;
+
     state = twr_module_relay_get_state(&relay_0);
     if (state != TWR_MODULE_RELAY_STATE_UNKNOWN)
     {
         buffer[3] = (uint8_t)state;
     }
+
     state = twr_module_relay_get_state(&relay_1);
     if (state != TWR_MODULE_RELAY_STATE_UNKNOWN)
     {
@@ -81,10 +87,20 @@ void send(uint8_t header)
         buffer[6] = temperature_i16;
     }
 
+    bool status;
+    if (twr_chester_a_relay_get_state(&chester_a, TWR_CHESTER_A_RELAY_1, &status)) {
+        buffer[7] = status;
+    }
+
+    if (twr_chester_a_relay_get_state(&chester_a, TWR_CHESTER_A_RELAY_2, &status)) {
+        buffer[8] = status;
+    }
+
     if (!twr_queue_put(&tx_queue, buffer, sizeof(buffer)))
     {
         twr_log_warning("TX QUEUE is full");
     }
+
     twr_scheduler_plan_now(send_task_id);
 }
 
@@ -169,10 +185,60 @@ void tmp112_event_handler(twr_tmp112_t *self, twr_tmp112_event_t event, void *ev
     }
 }
 
+void relay_set_state(uint8_t relay, bool state)
+{
+    switch (relay)
+    {
+    case POWER_MODULE_RELAY:
+        twr_module_power_relay_set_state(state);
+        break;
+    case MODULE_RELAY_DEFAULT:
+        twr_module_relay_set_state(&relay_0, state);
+        break;
+    case MODULE_RELAY_ALTERNATE:
+        twr_module_relay_set_state(&relay_1, state);
+        break;
+    case CHESTER_A_RELAY_1:
+        twr_chester_a_relay_set_state(&chester_a, TWR_CHESTER_A_RELAY_1, state);
+        break;
+    case CHESTER_A_RELAY_2:
+        twr_chester_a_relay_set_state(&chester_a, TWR_CHESTER_A_RELAY_2, state);
+        break;
+    default:
+        twr_log_error("Unknown relay");
+        return;
+    }
+}
+
+void relay_toggle(uint8_t relay)
+{
+    switch (relay)
+    {
+    case POWER_MODULE_RELAY:
+        twr_module_power_relay_set_state(!twr_module_power_relay_get_state());
+        break;
+    case MODULE_RELAY_DEFAULT:
+        twr_module_relay_toggle(&relay_0);
+        break;
+    case MODULE_RELAY_ALTERNATE:
+        twr_module_relay_toggle(&relay_1);
+        break;
+    case CHESTER_A_RELAY_1:
+        twr_chester_a_relay_toggle(&chester_a, TWR_CHESTER_A_RELAY_1);
+        break;
+    case CHESTER_A_RELAY_2:
+        twr_chester_a_relay_toggle(&chester_a, TWR_CHESTER_A_RELAY_2);
+        break;
+    default:
+        twr_log_error("Unknown relay");
+        return;
+    }
+}
+
 void relay_pulse_task(void *param)
 {
-    (void)param;
-    twr_module_power_relay_set_state(false);
+    uint8_t relay = (uint32_t) param;
+    relay_set_state(relay, false);
     send(HEADER_UPDATE);
 }
 
@@ -186,64 +252,42 @@ bool execute_rx(size_t length)
 
     for (size_t i = 0; i < length; i += 2)
     {
-        if (rx_buffer[i] == POWER_MODULE_RELAY)
-        {
-            twr_scheduler_plan_absolute(relay_pulse_task_id, TWR_TICK_INFINITY);
-
-            if (rx_buffer[i + 1] == 0x00)
-            {
-                twr_module_power_relay_set_state(false);
-                send(HEADER_UPDATE);
-            }
-            else if (rx_buffer[i + 1] == 0x01)
-            {
-                twr_module_power_relay_set_state(true);
-                send(HEADER_UPDATE);
-            }
-            else if (rx_buffer[i + 1] == 0x02)
-            {
-                twr_module_power_relay_set_state(!twr_module_power_relay_get_state());
-                send(HEADER_UPDATE);
-            }
-            else if (rx_buffer[i + 1] <= 0xf2)
-            {
-                uint32_t duration = (rx_buffer[i + 1] - 2) * 500;
-                twr_log_debug("Pulse %lu ms", duration);
-
-                twr_module_power_relay_set_state(true);
-                send(HEADER_UPDATE);
-                twr_scheduler_plan_from_now(relay_pulse_task_id, duration);
-            }
-            else
-            {
-                twr_log_error("Unknown command");
-            }
-        }
-        else if (rx_buffer[i] == MODULE_RELAY_DEFAULT || rx_buffer[i] == MODULE_RELAY_ALTERNATE)
-        {
-            twr_module_relay_t *relay = rx_buffer[i] == MODULE_RELAY_DEFAULT ? &relay_0 : &relay_1;
-
-            if (rx_buffer[i + 1] == 0x00)
-            {
-                twr_module_relay_set_state(relay, false);
-            }
-            else if (rx_buffer[i + 1] == 0x01)
-            {
-                twr_module_relay_set_state(relay, true);
-            }
-            else if (rx_buffer[i + 1] == 0x02)
-            {
-                twr_module_relay_toggle(relay);
-            }
-            else
-            {
-                twr_log_error("Unknown command");
-            }
-        }
-        else
+        uint8_t relay = rx_buffer[i];
+        if ((relay < POWER_MODULE_RELAY) || (relay > CHESTER_A_RELAY_2))
         {
             twr_log_error("Unknown relay");
             return false;
+        }
+
+        twr_scheduler_plan_absolute(pulse_task_id[relay], TWR_TICK_INFINITY);
+
+        if (rx_buffer[i + 1] == 0x00)
+        {
+            relay_set_state(relay, false);
+            send(HEADER_UPDATE);
+        }
+        else if (rx_buffer[i + 1] == 0x01)
+        {
+            relay_set_state(relay, true);
+            send(HEADER_UPDATE);
+        }
+        else if (rx_buffer[i + 1] == 0x02)
+        {
+            relay_toggle(relay);
+            send(HEADER_UPDATE);
+        }
+        else if (rx_buffer[i + 1] <= 0xf2)
+        {
+            uint32_t duration = (rx_buffer[i + 1] - 2) * 500;
+            twr_log_debug("Pulse %lu ms", duration);
+
+            relay_set_state(relay, true);
+            send(HEADER_UPDATE);
+            twr_scheduler_plan_from_now(pulse_task_id[relay], duration);
+        }
+        else
+        {
+            twr_log_error("Unknown command");
         }
     }
 
@@ -310,6 +354,12 @@ bool at_status(void)
     twr_atci_printfln("$STATUS: \"Relay\",%d", twr_module_power_relay_get_state());
     twr_atci_printfln("$STATUS: \"Relay_0\",%i", (int)twr_module_relay_get_state(&relay_0));
     twr_atci_printfln("$STATUS: \"Relay_1\",%i", (int)twr_module_relay_get_state(&relay_1));
+    bool status;
+    bool res;
+    res = twr_chester_a_relay_get_state(&chester_a, TWR_CHESTER_A_RELAY_1, &status);
+    twr_atci_printfln("$STATUS: \"CHESTER_A_Relay_1\",%i", res ? (int) status : -1);
+    res = twr_chester_a_relay_get_state(&chester_a, TWR_CHESTER_A_RELAY_2, &status);
+    twr_atci_printfln("$STATUS: \"CHESTER_A_Relay_2\",%i", res ? (int) status : -1);
 
     float temperature = NAN;
 
@@ -397,6 +447,9 @@ void application_init(void)
     twr_module_relay_init(&relay_0, TWR_MODULE_RELAY_I2C_ADDRESS_DEFAULT);
     twr_module_relay_init(&relay_1, TWR_MODULE_RELAY_I2C_ADDRESS_ALTERNATE);
 
+    // CHESTER A
+    twr_chester_a_init(&chester_a, TWR_I2C_I2C0);
+
     // Initialize lora module
     twr_cmwx1zzabz_init(&lora, TWR_UART_UART1);
     twr_cmwx1zzabz_set_event_handler(&lora, lora_callback, NULL);
@@ -418,7 +471,12 @@ void application_init(void)
 
     alarm_timeout = twr_tick_get() + 30 * 1000;
 
-    relay_pulse_task_id = twr_scheduler_register(relay_pulse_task, NULL, TWR_TICK_INFINITY);
+    pulse_task_id[POWER_MODULE_RELAY] = twr_scheduler_register(relay_pulse_task, (void *) POWER_MODULE_RELAY, TWR_TICK_INFINITY);
+    pulse_task_id[MODULE_RELAY_DEFAULT] = twr_scheduler_register(relay_pulse_task, (void *) MODULE_RELAY_DEFAULT, TWR_TICK_INFINITY);
+    pulse_task_id[MODULE_RELAY_ALTERNATE] = twr_scheduler_register(relay_pulse_task, (void *) MODULE_RELAY_ALTERNATE, TWR_TICK_INFINITY);
+    pulse_task_id[CHESTER_A_RELAY_1] = twr_scheduler_register(relay_pulse_task, (void *) CHESTER_A_RELAY_1, TWR_TICK_INFINITY);
+    pulse_task_id[CHESTER_A_RELAY_2] = twr_scheduler_register(relay_pulse_task, (void *) CHESTER_A_RELAY_2, TWR_TICK_INFINITY);
+
     send_task_id = twr_scheduler_register(send_task, NULL, TWR_TICK_INFINITY);
 
     twr_atci_printfln("@BOOT");

@@ -2,7 +2,7 @@
 
 # Firmware for HARDWARIO Lora CLASS-C Relay
 
-[![Travis](https://img.shields.io/travis/hardwario/twr-lora-class-c-relay/master.svg)](https://travis-ci.org/hardwario/twr-lora-class-c-relay)
+[![build](https://github.com/hardwario/twr-lora-class-c-relay/actions/workflows/main.yml/badge.svg)](https://github.com/hardwario/twr-lora-class-c-relay/actions/workflows/main.yml)
 [![Release](https://img.shields.io/github/release/hardwario/twr-lora-class-c-relay.svg)](https://github.com/hardwario/twr-lora-class-c-relay/releases)
 [![License](https://img.shields.io/github/license/hardwario/twr-lora-class-c-relay.svg)](https://github.com/hardwario/twr-lora-class-c-relay/blob/master/LICENSE)
 [![Twitter](https://img.shields.io/twitter/follow/hardwario_en.svg?style=social&label=Follow)](https://twitter.com/hardwario_en)

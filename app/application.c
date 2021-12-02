@@ -52,6 +52,8 @@ enum
 
 void send(uint8_t header)
 {
+    twr_log_debug("Send: %d", header);
+
     static uint8_t buffer[MESSAGE_SIZE];
     memset(buffer, 0xff, sizeof(buffer));
 
@@ -125,7 +127,7 @@ void send_task(void *param)
         twr_atci_print_buffer_as_hex(buffer, sizeof(buffer));
         twr_atci_print("\"\r\n");
 
-        timeout = twr_tick_get() + 10000;
+        timeout = twr_tick_get() + 20000;
         twr_scheduler_plan_current_absolute(timeout);
     }
 }
@@ -454,6 +456,7 @@ void application_init(void)
     twr_cmwx1zzabz_init(&lora, TWR_UART_UART1);
     twr_cmwx1zzabz_set_event_handler(&lora, lora_callback, NULL);
     twr_cmwx1zzabz_set_class(&lora, TWR_CMWX1ZZABZ_CONFIG_CLASS_C);
+    twr_cmwx1zzabz_set_repeat_unconfirmed(&lora, 3);
     twr_cmwx1zzabz_set_debug(&lora, true);
 
     // Initialize AT command interface
